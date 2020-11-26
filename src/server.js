@@ -12,7 +12,7 @@ app.get("/upload", async (req, res) => {
   const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
   const uploadParams = {
     Bucket: process.env.BUCKET_NAME,
-    Key: "/" + new Date().toISOString() + ".txt",
+    Key: new Date().toISOString() + ".txt",
     Body: process.env.HOSTNAME || "Unknown",
   };
 
