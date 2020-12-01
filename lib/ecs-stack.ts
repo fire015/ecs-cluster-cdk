@@ -8,20 +8,16 @@ import * as iam from "@aws-cdk/aws-iam";
 import config from "./config";
 
 interface MultistackProps extends cdk.StackProps {
-  ecrRepositoryStack: cdk.Construct;
+  ecrRepository: ecr.Repository;
 }
 
 export class EcsStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: MultistackProps) {
     super(scope, id, props);
 
-    const vpc = new ec2.Vpc(this, config.vpc.name);
+    const vpc = new ec2.Vpc(this, config.vpc.name, { maxAzs: 2 });
 
-    const repository = ecr.Repository.fromRepositoryName(
-      props.ecrRepositoryStack,
-      props.ecrRepositoryStack.node.id,
-      config.ecr.repositoryName
-    );
+    const repository = ecr.Repository.fromRepositoryName(props.ecrRepository, props.ecrRepository.node.id, config.ecr.repositoryName);
 
     const bucket = new s3.Bucket(this, config.s3.bucketName, {
       bucketName: config.s3.bucketName,
@@ -33,7 +29,7 @@ export class EcsStack extends cdk.Stack {
       clusterName: config.ecs.clusterName,
     });
 
-    const service = new ecs_patterns.ApplicationLoadBalancedFargateService(this, config.ecs.serviceName, {
+    const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, config.ecs.serviceName, {
       cluster: cluster,
       serviceName: config.ecs.serviceName,
       cpu: 256,
@@ -49,7 +45,12 @@ export class EcsStack extends cdk.Stack {
       assignPublicIp: false,
     });
 
-    service.taskDefinition.addToTaskRolePolicy(
+    const scaling = fargateService.service.autoScaleTaskCount({ maxCapacity: 4 });
+    scaling.scaleOnCpuUtilization("CpuScaling", {
+      targetUtilizationPercent: 50,
+    });
+
+    fargateService.taskDefinition.addToTaskRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["s3:PutObject"],

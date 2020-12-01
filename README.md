@@ -1,16 +1,16 @@
-This project uses the AWS CDK to spin up a load balanced ECS cluster and assign them IAM roles to push to S3.
+This project uses the AWS CDK to spin up a load balanced ECS/Fargate cluster and assign IAM roles.
 
 # Deployment
 
 Run `aws configure` to setup access and secret keys for the account.
 
-Run `npm run deploy:ecr` to create the Docker repository.
+Run `npm run deploy:ecr` to create the ECR Docker repository.
 
-Visit the [ECR](https://us-east-1.console.aws.amazon.com/ecr/repositories?region=us-east-1) dashboard and click "View push commands" inside the repository to push the Docker image (build inside `./src`).
+Build the Docker image inside `./src` and then run `npm run push:ecr` to push to ECR.
 
 Run `npm run deploy:ecs` to create the ECS cluster and run the Docker image.
 
-Visit the EC2 load balancer URL in your browser.
+Visit the EC2 load balancer URL in your browser (webServiceURL in the output).
 
 ## Useful commands
 

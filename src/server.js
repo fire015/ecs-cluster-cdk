@@ -1,7 +1,10 @@
 const express = require("express");
+const morgan = require("morgan");
 const AWS = require("aws-sdk");
 const app = express();
-const port = 80;
+const port = process.env.PORT || 80;
+
+app.use(morgan("tiny"));
 
 app.get("/", (req, res) => {
   const data = { headers: req.headers, env: process.env };
@@ -22,6 +25,20 @@ app.get("/upload", async (req, res) => {
   } catch (err) {
     res.status(500).send(err.toString());
   }
+});
+
+// CPU intensive operation call with ?num=45
+app.get("/fibo", (req, res) => {
+  const fibo = (n) => {
+    if (n < 2) {
+      return 1;
+    }
+
+    return fibo(n - 2) + fibo(n - 1);
+  };
+
+  const num = fibo(parseInt(req.query.num || 1));
+  res.send("Result is " + num);
 });
 
 app.listen(port, () => {

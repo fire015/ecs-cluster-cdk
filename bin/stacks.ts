@@ -6,8 +6,8 @@ import { EcsStack } from "../lib/ecs-stack";
 
 const app = new cdk.App();
 
-const repository = new EcrRepositoryStack(app, "EcrRepositoryStack");
+const repositoryStack = new EcrRepositoryStack(app, "EcrRepositoryStack");
 
 new EcsStack(app, "EcsStack", {
-  ecrRepositoryStack: repository,
+  ecrRepository: repositoryStack.ecrRepository,
 });
