@@ -9,11 +9,11 @@ const run = async (outputsFile: string) => {
 
   const data = JSON.parse(fs.readFileSync(outputsFile).toString());
   const repositoryUri = data.EcrRepositoryStack.RepositoryUri as string;
-  const repositoryBase = repositoryUri.split("/")[0] as string;
+  const repositoryParts = repositoryUri.split("/");
 
   try {
-    await spawnCmd(`aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${repositoryBase}`);
-    await spawnCmd(`docker tag node-server:latest ${repositoryUri}:latest`);
+    await spawnCmd(`aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${repositoryParts[0]}`);
+    await spawnCmd(`docker tag ${repositoryParts[1]}:latest ${repositoryUri}:latest`);
     await spawnCmd(`docker push ${repositoryUri}:latest`);
   } catch (err) {
     console.error(`Failed with code ${err}`);
