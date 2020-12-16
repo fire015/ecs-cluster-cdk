@@ -38,7 +38,7 @@ export class EcsStack extends cdk.Stack {
       taskImageOptions: {
         image: ecs.ContainerImage.fromEcrRepository(repository, "latest"),
         environment: {
-          BUCKET_NAME: config.s3.bucketName,
+          BUCKET_NAME: bucket.bucketName,
         },
       },
       publicLoadBalancer: true,
