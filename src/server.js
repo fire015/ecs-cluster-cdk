@@ -11,6 +11,10 @@ app.get("/", (req, res) => {
   res.send(data);
 });
 
+app.get("/host", (req, res) => {
+  res.send(process.env.HOSTNAME || "Unknown");
+});
+
 app.get("/upload", async (req, res) => {
   const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
   const uploadParams = {
