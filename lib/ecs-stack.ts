@@ -17,37 +17,30 @@ export class EcsStack extends cdk.Stack {
 
     const vpc = new ec2.Vpc(this, config.vpc.name, { maxAzs: 2 });
 
-    const repository = ecr.Repository.fromRepositoryName(props.ecrRepository, props.ecrRepository.node.id, config.ecr.repositoryName);
-
-    const bucket = new s3.Bucket(this, config.s3.bucketName, {
+    const bucket = new s3.Bucket(this, "StaticBucket", {
       bucketName: config.s3.bucketName,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const cluster = new ecs.Cluster(this, config.ecs.clusterName, {
+    const cluster = new ecs.Cluster(this, "ECSCluster", {
       vpc: vpc,
       clusterName: config.ecs.clusterName,
     });
 
-    const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, config.ecs.serviceName, {
+    const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "ECSService", {
       cluster: cluster,
       serviceName: config.ecs.serviceName,
       cpu: 256,
       memoryLimitMiB: 512,
       desiredCount: 2,
       taskImageOptions: {
-        image: ecs.ContainerImage.fromEcrRepository(repository, "latest"),
+        image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository, "latest"),
         environment: {
           BUCKET_NAME: bucket.bucketName,
         },
       },
       publicLoadBalancer: true,
       assignPublicIp: false,
-    });
-
-    const scaling = fargateService.service.autoScaleTaskCount({ maxCapacity: 4 });
-    scaling.scaleOnCpuUtilization("CpuScaling", {
-      targetUtilizationPercent: 50,
     });
 
     fargateService.taskDefinition.addToTaskRolePolicy(
@@ -57,5 +50,18 @@ export class EcsStack extends cdk.Stack {
         resources: [bucket.bucketArn + "/*"],
       })
     );
+
+    const scalableTarget = fargateService.service.autoScaleTaskCount({
+      minCapacity: 2,
+      maxCapacity: 20,
+    });
+
+    scalableTarget.scaleOnCpuUtilization("CpuScaling", {
+      targetUtilizationPercent: 50,
+    });
+
+    scalableTarget.scaleOnMemoryUtilization("MemoryScaling", {
+      targetUtilizationPercent: 50,
+    });
   }
 }

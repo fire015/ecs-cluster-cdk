@@ -8,7 +8,7 @@ export class EcrRepositoryStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    this.ecrRepository = new ecr.Repository(this, config.ecr.repositoryName, {
+    this.ecrRepository = new ecr.Repository(this, "ECRRepository", {
       repositoryName: config.ecr.repositoryName,
     });
 

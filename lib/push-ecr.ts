@@ -20,8 +20,8 @@ const run = async (outputsFile: string) => {
   }
 };
 
-const spawnCmd = async (cmd: string) => {
-  return new Promise((resolve, reject) => {
+const spawnCmd = async (cmd: string): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
     const child = spawn(cmd, [], { stdio: "inherit", shell: true });
 
     child.on("close", (code) => {
