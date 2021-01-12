@@ -13,7 +13,7 @@
     "@aws-cdk/aws-ecs-patterns": "~1.82.0",
     "@aws-cdk/aws-iam": "~1.82.0",
     "@aws-cdk/aws-s3": "~1.82.0",
-    "@aws-cdk/core": "1.74.0",
+    "@aws-cdk/core": "~1.82.0",
     "@aws-cdk/assert": "~1.82.0",
     "@types/node": "^10.17.27",
     "aws-cdk": "~1.82.0",
